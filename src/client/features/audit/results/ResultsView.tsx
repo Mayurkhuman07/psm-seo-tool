@@ -137,7 +137,7 @@ export function ResultsView({
               target="_blank"
               rel="noreferrer"
             >
-              OpenSEO-Audit crawler
+              PSMSEO-Audit crawler
             </a>
             .
           </AlertDescription>

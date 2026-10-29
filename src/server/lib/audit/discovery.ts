@@ -121,7 +121,7 @@ export function parseRobotsTxt(
 
   const robots = robotsParser(`${origin}/robots.txt`, text);
   return {
-    // Our UA so an `OpenSEO-Audit` group wins over `*`.
+    // Our UA so an `PSMSEO-Audit` group wins over `*`.
     isAllowed: (url: string) => robots.isAllowed(url, CRAWL_USER_AGENT) ?? true,
     sitemapUrls: robots.getSitemaps(),
   };

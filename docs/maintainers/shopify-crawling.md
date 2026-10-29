@@ -109,10 +109,10 @@ The Shopify-specific parts:
 1. Watch the new `site_audit:rate_limited` logs and the share of Shopify
    audits that still stop early. The cache-status field tells whether cold
    pages are what gets refused.
-2. Register OpenSEO-Audit with Shopify through the Web Bot Auth registration
+2. Register PSMSEO-Audit with Shopify through the Web Bot Auth registration
    form: Signature-Agent `"https://app.openseo.so"`, the key directory at
    `/.well-known/http-message-signatures-directory`, user agent
-   `OpenSEO-Audit/1.0`, category Search Engine Optimization, the crawl rate
+   `PSMSEO-Audit/1.0`, category Search Engine Optimization, the crawl rate
    (one request per second, two in flight), and the public crawler page as
    documentation. There is no review timeline, and no report yet of approval
    lifting refusals for a Workers-based crawler, so treat it as a bet.

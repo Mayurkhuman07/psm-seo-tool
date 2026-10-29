@@ -69,7 +69,7 @@ export async function resolveTarget(value, resolver = lookup) {
 // authorization headers to the target. Caller matches signatures to each host.
 export function upstreamHeaders(incoming, url) {
   const headers = {
-    "user-agent": incoming["user-agent"] ?? "OpenSEO-Audit/1.0",
+    "user-agent": incoming["user-agent"] ?? "PSMSEO-Audit/1.0",
     accept: incoming.accept ?? "*/*",
     "accept-encoding": "identity",
   };

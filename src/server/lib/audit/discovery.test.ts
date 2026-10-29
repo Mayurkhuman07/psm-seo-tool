@@ -79,10 +79,10 @@ describe("discoverUrls", () => {
 });
 
 describe("parseRobotsTxt", () => {
-  it("applies an OpenSEO-Audit group over the wildcard group", () => {
+  it("applies an PSMSEO-Audit group over the wildcard group", () => {
     const robots = parseRobotsTxt(
       "https://example.com",
-      "User-agent: *\nAllow: /\n\nUser-agent: OpenSEO-Audit\nDisallow: /private/",
+      "User-agent: *\nAllow: /\n\nUser-agent: PSMSEO-Audit\nDisallow: /private/",
     );
 
     expect(robots.isAllowed("https://example.com/private/page")).toBe(false);

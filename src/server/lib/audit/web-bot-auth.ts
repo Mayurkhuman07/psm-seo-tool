@@ -14,7 +14,7 @@ import { z } from "zod";
 import { getOptionalEnvValue } from "@/server/lib/runtime-env";
 import { crawlerHeadersFor, type CrawlerAccess } from "@/shared/crawler-access";
 
-export const CRAWL_USER_AGENT = "OpenSEO-Audit/1.0";
+export const CRAWL_USER_AGENT = "PSMSEO-Audit/1.0";
 
 /** Where verifiers fetch our public key: `<origin>/.well-known/http-message-signatures-directory`. */
 const SIGNATURE_AGENT_ORIGIN = "https://app.openseo.so";
