@@ -1,0 +1,91 @@
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  CommandBlock,
+  helpLinkClassName,
+  SecretHelpPage,
+} from "@/client/features/help/SecretHelpPage";
+
+const OPENROUTER_KEYS_URL = "https://openrouter.ai/settings/keys";
+
+export const Route = createFileRoute("/_app/help/openrouter-api-key")({
+  component: OpenrouterApiKeyHelpPage,
+});
+
+function OpenrouterApiKeyHelpPage() {
+  const accountStep = (
+    <li>
+      Create an account at{" "}
+      <a
+        className={helpLinkClassName}
+        href="https://openrouter.ai"
+        target="_blank"
+        rel="noreferrer"
+      >
+        openrouter.ai
+      </a>{" "}
+      and add credits (pay-as-you-go, like DataForSEO).
+    </li>
+  );
+  const keyStep = (
+    <li>
+      Go to{" "}
+      <a
+        className={helpLinkClassName}
+        href={OPENROUTER_KEYS_URL}
+        target="_blank"
+        rel="noreferrer"
+      >
+        OpenRouter API Keys
+      </a>{" "}
+      and click "Create API Key".
+    </li>
+  );
+  return (
+    <SecretHelpPage
+      title="Set up your OpenRouter API key"
+      intro={
+        <>
+          PSM SEO needs the <code>OPENROUTER_API_KEY</code> secret before AI
+          features like SAM, the in-app SEO agent, can run. It is optional —
+          everything else in PSM SEO works without it.
+        </>
+      }
+      everyAppIntro="SAM, prompt suggestions and website research run on OpenRouter. On Every App the gateway holds the key once, for every app."
+      secretName="OPENROUTER_API_KEY"
+      steps={
+        <>
+          {accountStep}
+          {keyStep}
+          <li>
+            Save the key as the <code>OPENROUTER_API_KEY</code> secret in your
+            environment:
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>
+                Docker self-hosting: <code>.env</code>
+              </li>
+              <li>Cloudflare: set it in the Workers UI (see below)</li>
+              <li>
+                Local development: <code>.env.local</code>
+              </li>
+            </ul>
+          </li>
+          <li>Restart PSM SEO.</li>
+        </>
+      }
+      everyAppSteps={
+        <>
+          {accountStep}
+          {keyStep}
+          <li>
+            An owner or admin runs this from the Every App checkout and pastes
+            the key:
+            <CommandBlock command="pnpm everyapp secret set OPENROUTER_API_KEY" />
+          </li>
+          <li>Reload PSM SEO.</li>
+        </>
+      }
+      dashboardPasteStep="Paste your OpenRouter API key and save."
+      terminalPromptHint="Paste your OpenRouter API key when prompted."
+    />
+  );
+}
