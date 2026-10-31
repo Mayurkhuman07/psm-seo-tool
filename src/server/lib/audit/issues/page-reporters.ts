@@ -10,6 +10,7 @@
  */
 import type { AuditIssueType } from "@/shared/audit-issues";
 import type { CrawledPageResult } from "@/server/lib/audit/types";
+import { isNonPublicHost } from "@/server/lib/audit/private-hosts";
 
 export interface DetectedIssue {
   issueType: AuditIssueType;
@@ -71,6 +72,15 @@ function urlFriendlinessFailures(rawUrl: string): string[] {
     failures.push(`path longer than ${MAX_SEO_FRIENDLY_PATH_CHARS} characters`);
   }
   return failures;
+}
+
+/** An unparseable URL is treated as public, so a bad URL never hides a finding. */
+function isNonPublicUrl(rawUrl: string): boolean {
+  try {
+    return isNonPublicHost(new URL(rawUrl).hostname);
+  } catch {
+    return false;
+  }
 }
 
 function hasHeadingLevelSkip(headingOrder: number[]): boolean {
@@ -191,7 +201,9 @@ export function runPageReporters(page: CrawledPageResult): DetectedIssue[] {
   }
 
   // Transport security applies to every resource, not just HTML documents.
-  if (page.url.startsWith("http://")) {
+  // Plain HTTP is normal on localhost and internal hosts, so a self-hosted
+  // audit of one must not report this on every page it crawls.
+  if (page.url.startsWith("http://") && !isNonPublicUrl(page.url)) {
     report("insecure-page");
   }
 

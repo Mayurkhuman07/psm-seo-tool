@@ -400,6 +400,17 @@ describe("on-page hygiene checks", () => {
     );
   });
 
+  // Plain HTTP is how a self-hosted audit reaches a local or internal site,
+  // so reporting it would put one false positive on every page of that crawl.
+  it.each([
+    "http://localhost:8787/a",
+    "http://127.0.0.1:8787/a",
+    "http://192.168.1.10/a",
+    "http://staging.internal/a",
+  ])("does not report HTTP on the non-public host %s", (url) => {
+    expect(issueTypes(makePage({ url }))).not.toContain("insecure-page");
+  });
+
   it.each([
     ["https://example.com/clean-path", false],
     ["https://example.com/search?q=shoes", true],

@@ -39,6 +39,14 @@ import type { Fixture, IssueId } from "../src/fixtures/types";
 const BASE = (process.argv[2] ?? "http://localhost:8787").replace(/\/$/, "");
 const MAX_PAGES = 200;
 const CONCURRENCY = 10;
+/**
+ * The crawl paces itself at roughly one request a second, and the two 429
+ * fixtures double that interval for a while, so the full fixture set needs a
+ * couple of minutes even against a local server. Too small a budget does not
+ * fail loudly — it defers the rest of the frontier and the run reports a
+ * truncated crawl as a pile of NOT CRAWLED rows.
+ */
+const CRAWL_BUDGET_MS = 5 * 60_000;
 
 interface CrawlLink {
   sourceId: string;
@@ -97,7 +105,9 @@ async function crawl(origin: string): Promise<{
   const pages: CrawledPageResult[] = [];
   const links: CrawlLink[] = [];
   // One per crawl, as the production crawl chunk does.
-  const throttle = createCrawlThrottle(Date.now() + 90_000);
+  const throttle = createCrawlThrottle(Date.now() + CRAWL_BUDGET_MS);
+  /** Pages the throttle refused to fetch, i.e. the budget ran out. */
+  let deferred = 0;
 
   const enqueue = (url: string, depth: number | null) => {
     const n = normalizeUrl(url);
@@ -135,7 +145,10 @@ async function crawl(origin: string): Promise<{
 
     for (let i = 0; i < crawled.length; i++) {
       const page = crawled[i];
-      if (!page) continue;
+      if (!page) {
+        deferred++;
+        continue;
+      }
       const depth = batch[i].depth;
       pages.push(page);
 
@@ -153,8 +166,14 @@ async function crawl(origin: string): Promise<{
     }
   }
 
+  // A deferred page means the budget ran out mid-crawl. Calling that a
+  // completed crawl runs orphan detection over a partial link graph, which
+  // reports perfectly healthy pages as orphans.
   const completed =
-    !throttle.stopped && linkQueue.length === 0 && sitemapQueue.length === 0;
+    !throttle.stopped &&
+    deferred === 0 &&
+    linkQueue.length === 0 &&
+    sitemapQueue.length === 0;
   return { pages, links, completed };
 }
 
@@ -341,8 +360,10 @@ async function main() {
     });
   };
 
-  // Non-fixture content pages must be clean.
-  check("Homepage", "/", [], false);
+  // Non-fixture content pages must be clean. The homepage is the one
+  // exception: badseo.dev ships no favicon, and no-favicon is reported on the
+  // entry point alone, so the start URL is the only page that can carry it.
+  check("Homepage", "/", ["no-favicon"], false);
   check("Privacy policy", "/privacy", [], false);
 
   const byCategory = new Map<string, Fixture[]>();
