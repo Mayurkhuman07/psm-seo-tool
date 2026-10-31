@@ -28,7 +28,13 @@ export async function readTextUpTo(
       parts.push(decoder.decode(chunk, { stream: true }));
 
       if (bytesRead >= maxBytes) {
-        await reader.cancel();
+        // Deliberately not awaited. On a branch of a tee'd body — which is
+        // what response.clone() produces — cancel() only settles once *both*
+        // branches are cancelled, so awaiting it here deadlocks whenever the
+        // caller still means to read the other branch. logRateLimited reads a
+        // clone of a 429 before crawlPage reads the original, so any site
+        // answering 429 with a body over maxBytes hung the crawl forever.
+        void reader.cancel();
         break;
       }
     }
